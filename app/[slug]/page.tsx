@@ -1,6 +1,3 @@
-cd ~/meme-site
-
-cat <<'EOF' > "app/[slug]/page.tsx"
 // app/[slug]/page.tsx
 import fs from "fs";
 import path from "path";
