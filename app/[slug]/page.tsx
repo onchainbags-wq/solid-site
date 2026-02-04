@@ -1,3 +1,7 @@
+cd ~/meme-site
+
+rm -f 'app/[slug]/page.tsx'
+
 cat > 'app/[slug]/page.tsx' <<'EOF'
 import fs from "fs";
 import path from "path";
@@ -52,10 +56,8 @@ function ButtonLink({
   const base =
     "w-full rounded-xl px-4 py-3 text-center font-semibold transition " +
     "focus:outline-none focus:ring-2 focus:ring-white/15";
-  const enabled =
-    "bg-white text-black hover:opacity-90 active:opacity-80";
-  const disabled =
-    "bg-white/10 text-white/40 cursor-not-allowed";
+  const enabled = "bg-white text-black hover:opacity-90 active:opacity-80";
+  const disabled = "bg-white/10 text-white/40 cursor-not-allowed";
   return (
     <a
       href={live ? href : undefined}
@@ -91,17 +93,14 @@ export default async function CoinPage({
 
   return (
     <main className="min-h-screen bg-black text-white">
-      {/* Background glow */}
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(800px_500px_at_50%_20%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(700px_500px_at_70%_10%,rgba(168,85,247,0.18),transparent_55%)]" />
         <div className="absolute inset-0 bg-black/60" />
       </div>
 
       <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-16">
-        {/* Hero */}
         <div className="relative mb-8 flex flex-col items-center">
           <div className="relative">
-            {/* Glow behind hero */}
             <div className="absolute -inset-10 -z-10 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.22),transparent_60%)] blur-2xl" />
             <div className="animate-[float_4s_ease-in-out_infinite]">
               <Image
@@ -115,7 +114,6 @@ export default async function CoinPage({
             </div>
           </div>
 
-          {/* Copy */}
           <div className="mt-6 text-center">
             <div className="text-xs tracking-wide text-white/50">{caption}</div>
             <div className="mt-2 text-5xl font-extrabold tracking-tight">{ticker}</div>
@@ -123,7 +121,6 @@ export default async function CoinPage({
           </div>
         </div>
 
-        {/* CA box */}
         <div className="w-full rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
           <div className="mb-2 text-center text-xs text-white/45">Contract Address</div>
           <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3">
@@ -135,20 +132,13 @@ export default async function CoinPage({
           </div>
         </div>
 
-        {/* BUY + trust nudge */}
         <div className="mt-5 w-full">
-          <ButtonLink
-            href={pump}
-            className="bg-emerald-400 text-black hover:opacity-95"
-          >
+          <ButtonLink href={pump} className="bg-emerald-400 text-black hover:opacity-95">
             Buy on pump.fun
           </ButtonLink>
-          <div className="mt-2 text-center text-xs text-white/45">
-            {trustLine}
-          </div>
+          <div className="mt-2 text-center text-xs text-white/45">{trustLine}</div>
         </div>
 
-        {/* Secondary buttons */}
         <div className="mt-5 grid w-full grid-cols-2 gap-3">
           <ButtonLink href={dex}>DexScreener</ButtonLink>
           <ButtonLink href={x}>X</ButtonLink>
@@ -157,13 +147,11 @@ export default async function CoinPage({
           </div>
         </div>
 
-        {/* Small footer */}
         <div className="mt-8 text-center text-xs text-white/35">
           Powered by ChainDeployer Automate
         </div>
       </div>
 
-      {/* Pure Tailwind keyframes */}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
@@ -174,4 +162,7 @@ export default async function CoinPage({
   );
 }
 EOF
+
+# sanity check: first line should be "import fs from..."
+head -n 3 'app/[slug]/page.tsx'
 
