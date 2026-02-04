@@ -1,168 +1,247 @@
-cd ~/meme-site
-
-# wipe the bad file completely
-rm -f "app/[slug]/page.tsx"
-
-# recreate it cleanly (this writes ONLY code into the file)
-cat > "app/[slug]/page.tsx" <<'EOF'
+// app/[slug]/page.tsx
 import fs from "fs";
 import path from "path";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-
-// Keep ONE import (delete the other if it errors)
-import CopyButton from "@/app/components/CopyButton";
-// import CopyButton from "@/app/CopyButton";
+import CopyCA from "./copy-ca";
 
 type Coin = {
-  name: string;
-  ticker: string;
-  caption?: string;
-  tagline?: string;
-  trustLine?: string;
+  slug: string;
+  name?: string;
+  ticker?: string;
+
+  // assets
+  image?: string; // e.g. "/images/solid.png"
+
+  // copy
+  captionTop?: string; // "market dumping?"
+  captionMid?: string; // "$SOLID"
+  captionBottom?: string; // "still solid."
+
+  // links
   ca?: string;
-  image?: string;
-  links?: {
-    pumpfun?: string;
-    dexscreener?: string;
-    x?: string;
-    telegram?: string;
-  };
+  buyUrl?: string; // pump.fun link
+  chartUrl?: string; // dexscreener
+  xUrl?: string;
+  telegramUrl?: string;
+
+  // advanced
+  axiomUrl?: string;
+  gmgnUrl?: string;
 };
 
 function loadCoin(slug: string): Coin | null {
-  const file = path.join(process.cwd(), "characters", `${slug}.json`);
-  if (!fs.existsSync(file)) return null;
-  const raw = fs.readFileSync(file, "utf8");
-  return JSON.parse(raw) as Coin;
+  // characters/<slug>.json
+  const filePath = path.join(process.cwd(), "characters", `${slug}.json`);
+  if (!fs.existsSync(filePath)) return null;
+
+  const raw = fs.readFileSync(filePath, "utf8");
+  const data = JSON.parse(raw) as Partial<Coin>;
+  return {
+    slug,
+    ...data,
+  } as Coin;
 }
 
-function isLiveUrl(url?: string) {
-  if (!url) return false;
-  const u = url.trim();
-  if (!u || u === "#") return false;
-  return /^https?:\/\//i.test(u);
+function isValidHttpUrl(u?: string) {
+  if (!u) return false;
+  try {
+    const x = new URL(u);
+    return x.protocol === "http:" || x.protocol === "https:";
+  } catch {
+    return false;
+  }
 }
 
-function ButtonLink({
+function ExternalButton({
   href,
   children,
-  className = "",
+  variant = "ghost",
+  full = false,
 }: {
   href?: string;
   children: React.ReactNode;
-  className?: string;
+  variant?: "primary" | "ghost";
+  full?: boolean;
 }) {
-  const live = isLiveUrl(href);
+  const enabled = isValidHttpUrl(href);
+
   const base =
-    "w-full rounded-xl px-4 py-3 text-center font-semibold transition " +
-    "focus:outline-none focus:ring-2 focus:ring-white/15";
-  const enabled = "bg-white text-black hover:opacity-90 active:opacity-80";
-  const disabled = "bg-white/10 text-white/40 cursor-not-allowed";
+    "inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition " +
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 " +
+    "active:scale-[0.99] disabled:opacity-60";
+
+  const styles =
+    variant === "primary"
+      ? enabled
+        ? "bg-emerald-500 text-black shadow-[0_12px_40px_rgba(16,185,129,0.25)] hover:bg-emerald-400"
+        : "bg-white/10 text-white/40"
+      : enabled
+        ? "bg-white text-black hover:bg-white/90"
+        : "bg-white/10 text-white/35";
+
+  const width = full ? "w-full" : "w-full";
+
+  // If link is missing, render a non-clickable div (no event handlers needed)
+  if (!enabled) {
+    return (
+      <div
+        aria-disabled="true"
+        className={`${base} ${styles} ${width} cursor-not-allowed`}
+      >
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <a
-      href={live ? href : undefined}
-      aria-disabled={!live}
-      target={live ? "_blank" : undefined}
-      rel={live ? "noopener noreferrer" : undefined}
-      className={`${base} ${live ? enabled : disabled} ${className}`}
+    <Link
+      href={href!}
+      target="_blank"
+      rel="noreferrer"
+      className={`${base} ${styles} ${width}`}
     >
       {children}
-    </a>
+    </Link>
   );
 }
 
 export default async function CoinPage({
   params,
 }: {
+  // Next can pass params as a Promise in newer versions
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
   const coin = loadCoin(slug);
   if (!coin) return notFound();
 
-  const caption = coin.caption?.trim() || "market dumping?";
-  const ticker = coin.ticker?.trim() || "$SOLID";
-  const tagline = coin.tagline?.trim() || "still solid.";
-  const trustLine = coin.trustLine?.trim() || "Chart: DexScreener (soon)";
-  const ca = coin.ca?.trim() || "CA_GOES_HERE";
+  const captionTop = coin.captionTop ?? "market dumping?";
+  const captionMid = coin.captionMid ?? (coin.ticker ? `${coin.ticker}` : "$SOLID");
+  const captionBottom = coin.captionBottom ?? "still solid.";
 
-  const pump = coin.links?.pumpfun || "#";
-  const dex = coin.links?.dexscreener || "#";
-  const x = coin.links?.x || "#";
-  const tg = coin.links?.telegram || "#";
+  const imageSrc = coin.image ?? "/images/solid.png";
+
+  const buyEnabled = isValidHttpUrl(coin.buyUrl);
 
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(800px_500px_at_50%_20%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(700px_500px_at_70%_10%,rgba(168,85,247,0.18),transparent_55%)]" />
-        <div className="absolute inset-0 bg-black/60" />
+      {/* background wash */}
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_18%,rgba(16,185,129,0.18),rgba(59,130,246,0.10),rgba(0,0,0,0)_65%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(700px_420px_at_64%_14%,rgba(168,85,247,0.14),rgba(0,0,0,0)_60%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/60 to-black" />
       </div>
 
-      <div className="mx-auto flex min-h-screen max-w-2xl flex-col items-center justify-center px-6 py-16">
-        <div className="relative mb-8 flex flex-col items-center">
+      <div className="relative mx-auto flex min-h-screen max-w-[980px] flex-col items-center px-6 pb-16 pt-16">
+        {/* HERO */}
+        <div className="relative mb-8 mt-2 flex w-full flex-col items-center">
+          {/* glow behind hero */}
+          <div className="pointer-events-none absolute -top-6 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl animate-pulse" />
+          <div className="pointer-events-none absolute -top-2 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl" />
+
           <div className="relative">
-            <div className="absolute -inset-10 -z-10 rounded-full bg-[radial-gradient(circle,rgba(34,211,238,0.22),transparent_60%)] blur-2xl" />
-            <div className="animate-[float_4s_ease-in-out_infinite]">
-              <Image
-                src={coin.image || "/images/solid.png"}
-                alt={coin.name || "SOLID"}
-                width={520}
-                height={520}
-                priority
-                className="h-auto w-[280px] sm:w-[340px] drop-shadow-[0_25px_35px_rgba(0,0,0,0.65)]"
-              />
+            <Image
+              src={imageSrc}
+              alt={coin.name ?? slug}
+              width={420}
+              height={420}
+              priority
+              className="h-auto w-[240px] sm:w-[300px] md:w-[340px] select-none drop-shadow-[0_18px_60px_rgba(0,0,0,0.55)]"
+            />
+          </div>
+
+          {/* CAPTION STACK (below image) */}
+          <div className="mt-3 flex flex-col items-center gap-2 text-center">
+            <div className="text-[11px] tracking-wide text-white/40">
+              {captionTop}
+            </div>
+
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+              {captionMid}
+            </h1>
+
+            <div className="text-sm font-medium text-white/55">
+              {captionBottom}
             </div>
           </div>
+        </div>
 
-          <div className="mt-6 text-center">
-            <div className="text-xs tracking-wide text-white/50">{caption}</div>
-            <div className="mt-2 text-5xl font-extrabold tracking-tight">{ticker}</div>
-            <div className="mt-1 text-lg text-white/70">{tagline}</div>
+        {/* CA BOX */}
+        <div className="w-full max-w-[540px] rounded-2xl bg-[#0B1324]/85 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur">
+          <div className="mb-2 text-center text-[11px] font-medium text-white/35">
+            Contract Address
+          </div>
+
+          <CopyCA ca={coin.ca ?? "CA_GOES_HERE"} />
+
+          <div className="mt-2 text-center text-[11px] text-white/25">
+            Verify CA in Telegram pinned
           </div>
         </div>
 
-        <div className="w-full rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-[0_20px_60px_rgba(0,0,0,0.55)]">
-          <div className="mb-2 text-center text-xs text-white/45">Contract Address</div>
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <div className="text-[11px] text-white/40">Tap to copy</div>
-              <div className="truncate font-mono text-sm text-white/85">{ca}</div>
-            </div>
-            <CopyButton value={ca} />
+        {/* BUY */}
+        <div className="mt-6 w-full max-w-[540px]">
+          <ExternalButton href={coin.buyUrl} variant="primary" full>
+            {buyEnabled ? "Buy on pump.fun" : "Buy (link goes live at launch)"}
+          </ExternalButton>
+
+          {/* ONE trust nudge line (do not duplicate elsewhere) */}
+          <div className="mt-2 text-center text-[11px] text-white/35">
+            Powered by ChainDeployer Automate
+          </div>
+
+          {/* Advanced small links */}
+          <div className="mt-2 text-center text-[11px] text-white/25">
+            Advanced traders:{" "}
+            {isValidHttpUrl(coin.axiomUrl) ? (
+              <Link
+                href={coin.axiomUrl!}
+                target="_blank"
+                rel="noreferrer"
+                className="text-white/45 underline underline-offset-2 hover:text-white/70"
+              >
+                Axiom
+              </Link>
+            ) : (
+              <span className="text-white/25">Axiom</span>
+            )}
+            {"  •  "}
+            {isValidHttpUrl(coin.gmgnUrl) ? (
+              <Link
+                href={coin.gmgnUrl!}
+                target="_blank"
+                rel="noreferrer"
+                className="text-white/45 underline underline-offset-2 hover:text-white/70"
+              >
+                GMGN
+              </Link>
+            ) : (
+              <span className="text-white/25">GMGN</span>
+            )}
           </div>
         </div>
 
-        <div className="mt-5 w-full">
-          <ButtonLink href={pump} className="bg-emerald-400 text-black hover:opacity-95">
-            Buy on pump.fun
-          </ButtonLink>
-          <div className="mt-2 text-center text-xs text-white/45">{trustLine}</div>
-        </div>
-
-        <div className="mt-5 grid w-full grid-cols-2 gap-3">
-          <ButtonLink href={dex}>DexScreener</ButtonLink>
-          <ButtonLink href={x}>X</ButtonLink>
-          <div className="col-span-2">
-            <ButtonLink href={tg}>Telegram</ButtonLink>
+        {/* LINKS */}
+        <div className="mt-6 w-full max-w-[540px]">
+          <div className="grid grid-cols-2 gap-3">
+            <ExternalButton href={coin.chartUrl} variant="ghost">
+              DexScreener
+            </ExternalButton>
+            <ExternalButton href={coin.xUrl} variant="ghost">
+              X
+            </ExternalButton>
           </div>
-        </div>
 
-        <div className="mt-8 text-center text-xs text-white/35">
-          Powered by ChainDeployer Automate
+          <div className="mt-3">
+            <ExternalButton href={coin.telegramUrl} variant="ghost" full>
+              Telegram
+            </ExternalButton>
+          </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-      `}</style>
     </main>
   );
 }
-EOF
-
-# confirm the file starts with real code (NOT "cd" / "cat")
-head -n 3 "app/[slug]/page.tsx"
