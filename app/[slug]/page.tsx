@@ -119,7 +119,7 @@ export default async function CoinPage({
   if (!coin) return notFound();
 
   const captionTop = coin.captionTop ?? "market dumping?";
-  const captionMid = coin.captionMid ?? (coin.ticker ? `$${coin.ticker}` : "$SOLID");
+  const captionMid = coin.captionMid ?? (coin.ticker ? `${coin.ticker}` : "$SOLID");
   const captionBottom = coin.captionBottom ?? "still solid.";
 
   const imageSrc = coin.image ?? "/images/solid.png";
