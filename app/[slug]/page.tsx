@@ -98,7 +98,7 @@ export default async function Page({
                   </div>
                 </div>
 
-                <CopyButton text={c.ca} className="shrink-0" />
+                <CopyButton text={c.ca} />
               </div>
 
               <div className="mt-3 text-center text-[11px] text-white/35">
