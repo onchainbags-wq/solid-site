@@ -3,16 +3,20 @@
   "ticker": "$SOLID",
   "caption": "market dumping?",
   "tagline": "still solid.",
-  "trustLine": "Fair launch • Solana • No presale",
-  "ca": "CA_GOES_HERE",
+  "trustLine": "Fair launch \u2022 Solana \u2022 No presale",
+  "ca": "CATEST",
   "image": "/images/solid.png",
-
   "buyUrl": "#",
   "chartUrl": "#",
   "xUrl": "https://x.com/bagsonchain",
   "telegramUrl": "https://t.me/+Y9P_Gq5JW584ZGJh",
-
   "axiomUrl": "#",
-  "gmgnUrl": "#"
+  "gmgnUrl": "#",
+  "links": {
+    "pumpfun": "https://pump.fun/PASTE",
+    "dexscreener": "#",
+    "x": "https://x.com/bagsonchain",
+    "telegram": "https://t.me/+Y9P_Gq5JW584ZGJh",
+    "site": "https://solid-site-green.vercel.app/"
+  }
 }
-
