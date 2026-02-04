@@ -190,7 +190,7 @@ export default async function CoinPage({
 
           {/* ONE trust nudge line (do not duplicate elsewhere) */}
           <div className="mt-2 text-center text-[11px] text-white/35">
-            Fair launch • No presale • No insiders
+            Powered by ChainDeployer_AI
           </div>
 
           {/* Advanced small links */}
