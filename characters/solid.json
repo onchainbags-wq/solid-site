@@ -1,13 +1,11 @@
 {
-  "name": "SOLID",
-  "ticker": "$SOLID",
-  "captionTop": "market dumping?",
-  "captionMid": "$SOLID",
-  "captionBottom": "still solid.",
   "ca": "9vUtLPfX5Tr3WHMg3dJiofokwnUfi5UCW93Xb6Jepump",
-  "image": "/images/solid.png",
-  "buyUrl": "https://pump.fun/coin/9vUtLPfX5Tr3WHMg3dJiofokwnUfi5UCW93Xb6Jepump",
+  "buyUrl": "https://pump.fun/REAL_LINK",
   "chartUrl": "https://dexscreener.com/solana/aq2nccwliqkzstslceijsmtc6fi67syeeawh9zu3w9fh",
   "xUrl": "https://x.com/bagsonchain",
-  "telegramUrl": "https://t.me/+Y9P_Gq5JW584ZGJh"
+  "telegramUrl": "https://t.me/+Y9P_Gq5JW584ZGJh",
+  "image": "/images/solid.png",
+  "captionTop": "market dumping?",
+  "captionMid": "$SOLID",
+  "captionBottom": "still solid."
 }
