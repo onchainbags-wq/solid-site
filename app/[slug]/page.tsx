@@ -262,4 +262,3 @@ export default async function CoinPage({
     </main>
   );
 }
-EOF
