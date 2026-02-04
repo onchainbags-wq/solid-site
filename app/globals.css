@@ -24,3 +24,51 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* --- SOLID site micro-polish (no styled-jsx) --- */
+
+@keyframes solidHeroFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes solidHeroGlowPulse {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.solid-hero-float {
+  animation: solidHeroFloat 7s ease-in-out infinite;
+}
+
+.solid-hero-glow {
+  background: radial-gradient(
+    circle at 50% 55%,
+    rgba(16, 185, 129, 0.35),
+    rgba(168, 85, 247, 0.22),
+    transparent 60%
+  );
+  animation: solidHeroGlowPulse 6s ease-in-out infinite;
+}
+
+.bg-solid-ambient {
+  background: radial-gradient(
+      600px 600px at 50% 20%,
+      rgba(20, 184, 166, 0.25),
+      transparent 60%
+    ),
+    radial-gradient(
+      700px 700px at 60% 0%,
+      rgba(168, 85, 247, 0.18),
+      transparent 55%
+    );
+}
