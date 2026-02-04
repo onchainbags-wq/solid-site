@@ -1,8 +1,14 @@
+cd ~/meme-site
+
+cat > "app/[slug]/page.tsx" <<'EOF'
 import fs from "fs";
 import path from "path";
 import Image from "next/image";
+import { notFound } from "next/navigation";
 
 import CopyButton from "@/app/components/CopyButton";
+
+export const runtime = "nodejs"; // ensures fs works on Vercel
 
 type Character = {
   name: string;
@@ -20,29 +26,29 @@ type Character = {
   };
 };
 
+function loadCharacter(slug: string): Character {
+  const filePath = path.join(process.cwd(), "characters", `${slug}.json`);
+
+  if (!fs.existsSync(filePath)) {
+    notFound();
+  }
+
+  const raw = fs.readFileSync(filePath, "utf8");
+  return JSON.parse(raw) as Character;
+}
+
 export default function Page({ params }: { params: { slug: string } }) {
-  const filePath = path.join(process.cwd(), "characters", `${params.slug}.json`);
-  const c: Character = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  const c = loadCharacter(params.slug);
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-start pt-20 px-4 text-white bg-black">
       {/* IMAGE */}
       <div className="mb-6">
-        <Image
-          src={c.image}
-          alt={c.name}
-          width={220}
-          height={220}
-          priority
-        />
+        <Image src={c.image} alt={c.name} width={220} height={220} priority />
       </div>
 
       {/* TITLE */}
-      {c.caption && (
-        <div className="text-[13px] text-white/40 mb-1">
-          {c.caption}
-        </div>
-      )}
+      {c.caption && <div className="text-[13px] text-white/40 mb-1">{c.caption}</div>}
 
       <h1 className="text-4xl font-bold mb-1">{c.ticker}</h1>
       <div className="text-white/50 mb-8">{c.tagline}</div>
@@ -50,16 +56,10 @@ export default function Page({ params }: { params: { slug: string } }) {
       {/* CA CARD */}
       {c.ca && (
         <div className="w-full max-w-md rounded-xl bg-[#0b1220] p-5 mb-6">
-          <div className="text-[12px] text-white/40 mb-2 text-center">
-            Contract Address
-          </div>
+          <div className="text-[12px] text-white/40 mb-2 text-center">Contract Address</div>
 
           <div className="flex items-center gap-2 bg-[#141c2f] rounded-lg px-3 py-2">
-            <div className="flex-1 text-sm truncate">
-              {c.ca}
-            </div>
-
-            {/* IMPORTANT FIX: wrap CopyButton */}
+            <div className="flex-1 text-sm truncate">{c.ca}</div>
             <div>
               <CopyButton text={c.ca} />
             </div>
@@ -73,9 +73,12 @@ export default function Page({ params }: { params: { slug: string } }) {
 
       {/* BUY BUTTON */}
       <div className="w-full max-w-md mb-4">
-        <div className="w-full rounded-lg bg-white/10 text-center py-3 text-white/60 text-sm">
+        <a
+          href={c.links.pumpfun || "#"}
+          className="w-full block rounded-lg bg-white/10 text-center py-3 text-white/60 text-sm hover:bg-white/15 transition"
+        >
           Buy (link goes live at launch)
-        </div>
+        </a>
         <div className="text-[11px] text-center text-white/30 mt-1">
           Powered by ChainDeployer Automate
         </div>
@@ -107,3 +110,4 @@ export default function Page({ params }: { params: { slug: string } }) {
     </main>
   );
 }
+EOF
