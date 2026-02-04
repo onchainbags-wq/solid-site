@@ -1,12 +1,13 @@
-"ca": "REAL_CA_HERE",
-"buyUrl": "https://pump.fun/REAL_LINK",
-"chartUrl": "",
-"xUrl": "https://x.com/bagsonchain",
-"telegramUrl": "https://t.me/+Y9P_Gq5JW584ZGJh",
-"links": {
-  "pumpfun": "https://pump.fun/REAL_LINK",
-  "dexscreener": "",
-  "x": "https://x.com/bagsonchain",
-  "telegram": "https://t.me/+Y9P_Gq5JW584ZGJh",
-  "site": "https://solid-site-green.vercel.app/"
+{
+  "name": "SOLID",
+  "ticker": "$SOLID",
+  "captionTop": "market dumping?",
+  "captionMid": "$SOLID",
+  "captionBottom": "still solid.",
+  "ca": "REAL_CA_HERE",
+  "image": "/images/solid.png",
+  "buyUrl": "https://pump.fun/REAL_LINK",
+  "chartUrl": "",
+  "xUrl": "https://x.com/bagsonchain",
+  "telegramUrl": "https://t.me/+Y9P_Gq5JW584ZGJh"
 }
