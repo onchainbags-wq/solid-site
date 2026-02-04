@@ -192,36 +192,6 @@ export default async function CoinPage({
           <div className="mt-2 text-center text-[11px] text-white/35">
             Powered by ChainDeployer Automate
           </div>
-
-          {/* Advanced small links */}
-          <div className="mt-2 text-center text-[11px] text-white/25">
-            Advanced traders:{" "}
-            {isValidHttpUrl(coin.axiomUrl) ? (
-              <Link
-                href={coin.axiomUrl!}
-                target="_blank"
-                rel="noreferrer"
-                className="text-white/45 underline underline-offset-2 hover:text-white/70"
-              >
-                Axiom
-              </Link>
-            ) : (
-              <span className="text-white/25">Axiom</span>
-            )}
-            {"  •  "}
-            {isValidHttpUrl(coin.gmgnUrl) ? (
-              <Link
-                href={coin.gmgnUrl!}
-                target="_blank"
-                rel="noreferrer"
-                className="text-white/45 underline underline-offset-2 hover:text-white/70"
-              >
-                GMGN
-              </Link>
-            ) : (
-              <span className="text-white/25">GMGM</span>
-            )}
-          </div>
         </div>
 
         {/* LINKS */}
