@@ -6,13 +6,13 @@
   "trustLine": "Fair launch • Solana • No presale",
   "ca": "CA_GOES_HERE",
   "image": "/images/solid.png",
-  "links": {
-    "pumpfun": "#",
-    "dexscreener": "#",
-    "x":"https://x.com/bagsonchain",
-    "telegram": "https://t.me/+Y9P_Gq5JW584ZGJh",
-    "axiom": "#",
-    "gmgn": "#"
-  }
+
+  "buyUrl": "#",
+  "chartUrl": "#",
+  "xUrl": "https://x.com/bagsonchain",
+  "telegramUrl": "https://t.me/+Y9P_Gq5JW584ZGJh",
+
+  "axiomUrl": "#",
+  "gmgnUrl": "#"
 }
 
