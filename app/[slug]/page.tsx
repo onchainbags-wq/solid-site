@@ -219,7 +219,7 @@ export default async function CoinPage({
                 GMGN
               </Link>
             ) : (
-              <span className="text-white/25">GMGN</span>
+              <span className="text-white/25">GMGM</span>
             )}
           </div>
         </div>
