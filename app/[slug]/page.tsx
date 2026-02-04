@@ -2,213 +2,183 @@
 import fs from "fs";
 import path from "path";
 import Image from "next/image";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import CopyCA from "./copy-ca";
+import CopyButton from "../components/CopyButton";
 
-type Coin = {
-  slug: string;
-  name?: string;
-  ticker?: string;
-
-  // assets
-  image?: string; // e.g. "/images/solid.png"
-
-  // copy
-  captionTop?: string; // "market dumping?"
-  captionMid?: string; // "$SOLID"
-  captionBottom?: string; // "still solid."
-
-  // links
-  ca?: string;
-  buyUrl?: string; // pump.fun link
-  chartUrl?: string; // dexscreener
-  xUrl?: string;
-  telegramUrl?: string;
-
-  // advanced
-  axiomUrl?: string;
-  gmgnUrl?: string;
+type Character = {
+  name: string;
+  ticker: string;       // e.g. "$SOLID"
+  caption: string;      // "market dumping?"
+  tagline: string;      // "still solid."
+  trustLine?: string;   // optional
+  ca: string;           // "CA_GOES_HERE"
+  image: string;        // "/images/solid.png"
+  links: {
+    pumpfun?: string;
+    dexscreener?: string;
+    x?: string;
+    telegram?: string;
+  };
 };
 
-function loadCoin(slug: string): Coin | null {
-  // characters/<slug>.json
+function loadCharacter(slug: string): Character {
   const filePath = path.join(process.cwd(), "characters", `${slug}.json`);
-  if (!fs.existsSync(filePath)) return null;
-
   const raw = fs.readFileSync(filePath, "utf8");
-  const data = JSON.parse(raw) as Partial<Coin>;
-  return {
-    slug,
-    ...data,
-  } as Coin;
+  return JSON.parse(raw) as Character;
 }
 
-function isValidHttpUrl(u?: string) {
-  if (!u) return false;
-  try {
-    const x = new URL(u);
-    return x.protocol === "http:" || x.protocol === "https:";
-  } catch {
-    return false;
-  }
+function isRealLink(url?: string) {
+  return !!url && url !== "#" && url.trim().length > 0;
 }
 
-function ExternalButton({
-  href,
-  children,
-  variant = "ghost",
-  full = false,
-}: {
-  href?: string;
-  children: React.ReactNode;
-  variant?: "primary" | "ghost";
-  full?: boolean;
-}) {
-  const enabled = isValidHttpUrl(href);
-
-  const base =
-    "inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition " +
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 " +
-    "active:scale-[0.99] disabled:opacity-60";
-
-  const styles =
-    variant === "primary"
-      ? enabled
-        ? "bg-emerald-500 text-black shadow-[0_12px_40px_rgba(16,185,129,0.25)] hover:bg-emerald-400"
-        : "bg-white/10 text-white/40"
-      : enabled
-        ? "bg-white text-black hover:bg-white/90"
-        : "bg-white/10 text-white/35";
-
-  const width = full ? "w-full" : "w-full";
-
-  // If link is missing, render a non-clickable div (no event handlers needed)
-  if (!enabled) {
-    return (
-      <div
-        aria-disabled="true"
-        className={`${base} ${styles} ${width} cursor-not-allowed`}
-      >
-        {children}
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      href={href!}
-      target="_blank"
-      rel="noreferrer"
-      className={`${base} ${styles} ${width}`}
-    >
-      {children}
-    </Link>
-  );
-}
-
-export default async function CoinPage({
+export default async function Page({
   params,
 }: {
-  // Next can pass params as a Promise in newer versions
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const c = loadCharacter(slug);
 
-  const coin = loadCoin(slug);
-  if (!coin) return notFound();
+  const pumpUrl = c.links?.pumpfun;
+  const dexUrl = c.links?.dexscreener;
+  const xUrl = c.links?.x;
+  const tgUrl = c.links?.telegram;
 
-  const captionTop = coin.captionTop ?? "market dumping?";
-  const captionMid = coin.captionMid ?? (coin.ticker ? `${coin.ticker}` : "$SOLID");
-  const captionBottom = coin.captionBottom ?? "still solid.";
-
-  const imageSrc = coin.image ?? "/images/solid.png";
-
-  const buyEnabled = isValidHttpUrl(coin.buyUrl);
+  const buyIsLive = isRealLink(pumpUrl);
+  const dexIsLive = isRealLink(dexUrl);
 
   return (
-    <main className="min-h-screen bg-black text-white">
-      {/* background wash */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_50%_18%,rgba(16,185,129,0.18),rgba(59,130,246,0.10),rgba(0,0,0,0)_65%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(700px_420px_at_64%_14%,rgba(168,85,247,0.14),rgba(0,0,0,0)_60%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/60 to-black" />
+    <main className="relative min-h-screen w-full overflow-hidden bg-black">
+      {/* Background glow */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/2 top-[-140px] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-[90px]" />
+        <div className="absolute right-[-140px] top-[-120px] h-[520px] w-[520px] rounded-full bg-fuchsia-500/10 blur-[100px]" />
+        <div className="absolute left-[-160px] top-[120px] h-[520px] w-[520px] rounded-full bg-cyan-500/10 blur-[110px]" />
       </div>
 
-      <div className="relative mx-auto flex min-h-screen max-w-[980px] flex-col items-center px-6 pb-16 pt-16">
-        {/* HERO */}
-        <div className="relative mb-8 mt-2 flex w-full flex-col items-center">
-          {/* glow behind hero */}
-          <div className="pointer-events-none absolute -top-6 h-72 w-72 rounded-full bg-emerald-500/20 blur-3xl animate-pulse" />
-          <div className="pointer-events-none absolute -top-2 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl" />
+      <div className="relative mx-auto flex min-h-screen max-w-3xl flex-col items-center px-5 pb-16 pt-10 text-white">
+        {/* Hero image */}
+        <div className="relative mb-6 mt-2 flex items-center justify-center">
+          <div className="absolute -inset-10 rounded-full bg-white/5 blur-2xl" />
+          <Image
+            src={c.image}
+            alt={c.name}
+            width={560}
+            height={560}
+            priority
+            className="relative h-auto w-[300px] sm:w-[360px] drop-shadow-[0_12px_45px_rgba(0,0,0,0.65)]"
+          />
+        </div>
 
-          <div className="relative">
-            <Image
-              src={imageSrc}
-              alt={coin.name ?? slug}
-              width={420}
-              height={420}
-              priority
-              className="h-auto w-[240px] sm:w-[300px] md:w-[340px] select-none drop-shadow-[0_18px_60px_rgba(0,0,0,0.55)]"
-            />
-          </div>
+        {/* Copy */}
+        <div className="text-center">
+          <div className="text-xs tracking-wide text-white/45">{c.caption}</div>
 
-          {/* CAPTION STACK (below image) */}
-          <div className="mt-3 flex flex-col items-center gap-2 text-center">
-            <div className="text-[11px] tracking-wide text-white/40">
-              {captionTop}
+          {/* IMPORTANT: use ticker exactly as stored in JSON (prevents $$) */}
+          <h1 className="mt-2 text-5xl font-extrabold tracking-tight sm:text-6xl">
+            {c.ticker}
+          </h1>
+
+          <div className="mt-2 text-base text-white/55">{c.tagline}</div>
+        </div>
+
+        {/* CTA Stack (tighter spacing) */}
+        <div className="mt-8 w-full max-w-xl">
+          {/* CA Card */}
+          <div className="rounded-3xl border border-white/10 bg-slate-900/35 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
+            <div className="text-center text-xs text-white/40">
+              Contract Address
             </div>
 
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-              {captionMid}
-            </h1>
+            <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-[11px] text-white/40">Tap to copy</div>
+                  <div className="mt-1 truncate font-mono text-sm text-white/90">
+                    {c.ca}
+                  </div>
+                </div>
 
-            <div className="text-sm font-medium text-white/55">
-              {captionBottom}
+                <CopyButton text={c.ca} className="shrink-0" />
+              </div>
+
+              <div className="mt-3 text-center text-[11px] text-white/35">
+                Verify CA in Telegram pinned
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* CA BOX */}
-        <div className="w-full max-w-[540px] rounded-2xl bg-[#0B1324]/85 p-5 shadow-[0_18px_70px_rgba(0,0,0,0.55)] ring-1 ring-white/5 backdrop-blur">
-          <div className="mb-2 text-center text-[11px] font-medium text-white/35">
-            Contract Address
+          {/* Buy Button (pulled up closer) */}
+          <div className="mt-4">
+            <a
+              href={buyIsLive ? pumpUrl : "#"}
+              target={buyIsLive ? "_blank" : undefined}
+              rel={buyIsLive ? "noreferrer" : undefined}
+              aria-disabled={!buyIsLive}
+              className={[
+                "block w-full rounded-2xl px-6 py-4 text-center font-semibold",
+                "transition",
+                buyIsLive
+                  ? "bg-emerald-500 text-black hover:bg-emerald-400"
+                  : "bg-white/10 text-white/50",
+              ].join(" ")}
+            >
+              {buyIsLive ? "Buy on pump.fun" : "Buy (link goes live at launch)"}
+            </a>
+
+            {/* small footer (kept, tightened) */}
+            <div className="mt-2 text-center text-[11px] text-white/35">
+              Powered by ChainDeployer Automate
+            </div>
           </div>
 
-          <CopyCA ca={coin.ca ?? "CA_GOES_HERE"} />
-
-          <div className="mt-2 text-center text-[11px] text-white/25">
-            Verify CA in Telegram pinned
-          </div>
-        </div>
-
-        {/* BUY */}
-        <div className="mt-6 w-full max-w-[540px]">
-          <ExternalButton href={coin.buyUrl} variant="primary" full>
-            {buyEnabled ? "Buy on pump.fun" : "Buy (link goes live at launch)"}
-          </ExternalButton>
-
-          {/* ONE trust nudge line (do not duplicate elsewhere) */}
-          <div className="mt-2 text-center text-[11px] text-white/35">
-            Powered by ChainDeployer Automate
-          </div>
-        </div>
-
-        {/* LINKS */}
-        <div className="mt-6 w-full max-w-[540px]">
-          <div className="grid grid-cols-2 gap-3">
-            <ExternalButton href={coin.chartUrl} variant="ghost">
+          {/* Secondary buttons (pulled up, tighter) */}
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <a
+              href={dexIsLive ? dexUrl : "#"}
+              target={dexIsLive ? "_blank" : undefined}
+              rel={dexIsLive ? "noreferrer" : undefined}
+              aria-disabled={!dexIsLive}
+              className={[
+                "rounded-2xl px-5 py-4 text-center font-medium transition",
+                dexIsLive
+                  ? "bg-white text-black hover:bg-white/90"
+                  : "bg-white/10 text-white/50",
+              ].join(" ")}
+            >
               DexScreener
-            </ExternalButton>
-            <ExternalButton href={coin.xUrl} variant="ghost">
+            </a>
+
+            <a
+              href={xUrl || "#"}
+              target={isRealLink(xUrl) ? "_blank" : undefined}
+              rel={isRealLink(xUrl) ? "noreferrer" : undefined}
+              aria-disabled={!isRealLink(xUrl)}
+              className={[
+                "rounded-2xl px-5 py-4 text-center font-medium transition",
+                isRealLink(xUrl)
+                  ? "bg-white text-black hover:bg-white/90"
+                  : "bg-white/10 text-white/50",
+              ].join(" ")}
+            >
               X
-            </ExternalButton>
+            </a>
           </div>
 
           <div className="mt-3">
-            <ExternalButton href={coin.telegramUrl} variant="ghost" full>
+            <a
+              href={tgUrl || "#"}
+              target={isRealLink(tgUrl) ? "_blank" : undefined}
+              rel={isRealLink(tgUrl) ? "noreferrer" : undefined}
+              aria-disabled={!isRealLink(tgUrl)}
+              className={[
+                "block w-full rounded-2xl px-5 py-4 text-center font-medium transition",
+                isRealLink(tgUrl)
+                  ? "bg-white text-black hover:bg-white/90"
+                  : "bg-white/10 text-white/50",
+              ].join(" ")}
+            >
               Telegram
-            </ExternalButton>
+            </a>
           </div>
         </div>
       </div>
