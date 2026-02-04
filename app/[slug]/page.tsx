@@ -1,3 +1,6 @@
+cd ~/meme-site
+
+cat <<'EOF' > "app/[slug]/page.tsx"
 // app/[slug]/page.tsx
 import fs from "fs";
 import path from "path";
@@ -26,9 +29,29 @@ type Coin = {
   xUrl?: string;
   telegramUrl?: string;
 
-  // advanced
+  // advanced (kept for future, not rendered)
   axiomUrl?: string;
   gmgnUrl?: string;
+};
+
+// Legacy shape support (your characters/solid.json style)
+type LegacyCharacter = {
+  name?: string;
+  ticker?: string;
+  caption?: string;
+  tagline?: string;
+  trustLine?: string;
+  ca?: string;
+  image?: string;
+  links?: {
+    pumpfun?: string;
+    dexscreener?: string;
+    x?: string;
+    telegram?: string;
+    axiom?: string;
+    gmgn?: string;
+    site?: string;
+  };
 };
 
 function loadCoin(slug: string): Coin | null {
@@ -37,10 +60,37 @@ function loadCoin(slug: string): Coin | null {
   if (!fs.existsSync(filePath)) return null;
 
   const raw = fs.readFileSync(filePath, "utf8");
-  const data = JSON.parse(raw) as Partial<Coin>;
+  const data = JSON.parse(raw) as any;
+
+  // If file already matches the Coin shape, just merge it.
+  // Otherwise map from legacy { caption/tagline + links.{...} } into Coin fields.
+  const legacy = data as LegacyCharacter;
+
+  const mapped: Partial<Coin> = {
+    // prefer new fields if present
+    captionTop: data.captionTop ?? legacy.caption ?? undefined,
+    captionMid: data.captionMid ?? (legacy.ticker ? `${legacy.ticker}` : undefined),
+    captionBottom: data.captionBottom ?? legacy.tagline ?? undefined,
+
+    ca: data.ca ?? legacy.ca ?? undefined,
+    image: data.image ?? legacy.image ?? undefined,
+
+    buyUrl: data.buyUrl ?? legacy.links?.pumpfun ?? undefined,
+    chartUrl: data.chartUrl ?? legacy.links?.dexscreener ?? undefined,
+    xUrl: data.xUrl ?? legacy.links?.x ?? undefined,
+    telegramUrl: data.telegramUrl ?? legacy.links?.telegram ?? undefined,
+
+    axiomUrl: data.axiomUrl ?? legacy.links?.axiom ?? undefined,
+    gmgnUrl: data.gmgnUrl ?? legacy.links?.gmgn ?? undefined,
+
+    name: data.name ?? legacy.name ?? undefined,
+    ticker: data.ticker ?? legacy.ticker ?? undefined,
+  };
+
   return {
     slug,
     ...data,
+    ...mapped,
   } as Coin;
 }
 
@@ -83,7 +133,7 @@ function ExternalButton({
 
   const width = full ? "w-full" : "w-full";
 
-  // If link is missing, render a non-clickable div (no event handlers needed)
+  // If link is missing, render a non-clickable div
   if (!enabled) {
     return (
       <div
@@ -110,7 +160,6 @@ function ExternalButton({
 export default async function CoinPage({
   params,
 }: {
-  // Next can pass params as a Promise in newer versions
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
@@ -125,6 +174,7 @@ export default async function CoinPage({
   const imageSrc = coin.image ?? "/images/solid.png";
 
   const buyEnabled = isValidHttpUrl(coin.buyUrl);
+  const chartEnabled = isValidHttpUrl(coin.chartUrl);
 
   return (
     <main className="min-h-screen bg-black text-white">
@@ -188,7 +238,6 @@ export default async function CoinPage({
             {buyEnabled ? "Buy on pump.fun" : "Buy (link goes live at launch)"}
           </ExternalButton>
 
-          {/* ONE trust nudge line (do not duplicate elsewhere) */}
           <div className="mt-2 text-center text-[11px] text-white/35">
             Powered by ChainDeployer Automate
           </div>
@@ -198,8 +247,9 @@ export default async function CoinPage({
         <div className="mt-6 w-full max-w-[540px]">
           <div className="grid grid-cols-2 gap-3">
             <ExternalButton href={coin.chartUrl} variant="ghost">
-              DexScreener
+              {chartEnabled ? "DexScreener" : "DexScreener (soon)"}
             </ExternalButton>
+
             <ExternalButton href={coin.xUrl} variant="ghost">
               X
             </ExternalButton>
@@ -215,3 +265,4 @@ export default async function CoinPage({
     </main>
   );
 }
+EOF
