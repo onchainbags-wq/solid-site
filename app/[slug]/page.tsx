@@ -190,7 +190,7 @@ export default async function CoinPage({
 
           {/* ONE trust nudge line (do not duplicate elsewhere) */}
           <div className="mt-2 text-center text-[11px] text-white/35">
-            Powered by ChainDeployer_AI
+            Powered by ChainDeployer Automate
           </div>
 
           {/* Advanced small links */}
