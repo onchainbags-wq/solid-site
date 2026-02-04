@@ -1,6 +1,10 @@
 cd ~/meme-site
 
-cat > 'app/[slug]/page.tsx' <<'EOF'
+# wipe the bad file completely
+rm -f "app/[slug]/page.tsx"
+
+# recreate it cleanly (this writes ONLY code into the file)
+cat > "app/[slug]/page.tsx" <<'EOF'
 import fs from "fs";
 import path from "path";
 import Image from "next/image";
@@ -160,6 +164,5 @@ export default async function CoinPage({
 }
 EOF
 
-# confirm first line is "import fs..."
-head -n 2 'app/[slug]/page.tsx'
-
+# confirm the file starts with real code (NOT "cd" / "cat")
+head -n 3 "app/[slug]/page.tsx"
