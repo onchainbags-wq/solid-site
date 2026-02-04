@@ -1,15 +1,12 @@
 cd ~/meme-site
 
-rm -f 'app/[slug]/page.tsx'
-
 cat > 'app/[slug]/page.tsx' <<'EOF'
 import fs from "fs";
 import path from "path";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
-// Prefer whichever CopyButton path you actually have.
-// Keep ONE of these imports and delete the other if it errors.
+// Keep ONE import (delete the other if it errors)
 import CopyButton from "@/app/components/CopyButton";
 // import CopyButton from "@/app/CopyButton";
 
@@ -83,7 +80,7 @@ export default async function CoinPage({
   const caption = coin.caption?.trim() || "market dumping?";
   const ticker = coin.ticker?.trim() || "$SOLID";
   const tagline = coin.tagline?.trim() || "still solid.";
-  const trustLine = coin.trustLine?.trim() || "Powered by ChainDeployer Automate";
+  const trustLine = coin.trustLine?.trim() || "Chart: DexScreener (soon)";
   const ca = coin.ca?.trim() || "CA_GOES_HERE";
 
   const pump = coin.links?.pumpfun || "#";
@@ -163,6 +160,6 @@ export default async function CoinPage({
 }
 EOF
 
-# sanity check: first line should be "import fs from..."
-head -n 3 'app/[slug]/page.tsx'
+# confirm first line is "import fs..."
+head -n 2 'app/[slug]/page.tsx'
 
